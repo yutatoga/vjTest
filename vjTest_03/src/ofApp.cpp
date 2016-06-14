@@ -1,92 +1,528 @@
 #include "ofApp.h"
 
+void setRandomColorToTriangle(ofxDelaunay *delaunay, ofMesh *mesh){
+    mesh->clear();
+    ofMesh triangleMesh = delaunay->triangleMesh;
+    for (int i = 0; i < delaunay->getNumTriangles(); i++) {
+        // get indices
+        int index1 = triangleMesh.getIndex(i*3);
+        int index2 = triangleMesh.getIndex(i*3+1);
+        int index3 = triangleMesh.getIndex(i*3+2);
+        
+        // add vertices
+        mesh->addVertex(triangleMesh.getVertex(index1));
+        mesh->addVertex(triangleMesh.getVertex(index2));
+        mesh->addVertex(triangleMesh.getVertex(index3));
+        
+        // add colors
+        ofColor randomColor(ofRandom(255), ofRandom(255), ofRandom(255), 255);
+        for (int i = 0; i < 3; i++) {
+            mesh->addColor(randomColor);
+        }
+    }
+}
+
+void setImageColorToTriangle(ofxDelaunay *delaunay, ofMesh *mesh, ofImage *image){
+    mesh->clear();
+    ofMesh triangleMesh = delaunay->triangleMesh;
+    for (int i = 0; i < delaunay->getNumTriangles(); i++) {
+        // get indices
+        int index1 = triangleMesh.getIndex(i*3);
+        int index2 = triangleMesh.getIndex(i*3+1);
+        int index3 = triangleMesh.getIndex(i*3+2);
+        
+        // add vertices
+        ofVec3f vertex1 = triangleMesh.getVertex(index1);
+        ofVec3f vertex2 = triangleMesh.getVertex(index2);
+        ofVec3f vertex3 = triangleMesh.getVertex(index3);
+        mesh->addVertex(vertex1);
+        mesh->addVertex(vertex2);
+        mesh->addVertex(vertex3);
+        
+        // add colors
+        ofVec3f centerOfTriangle = (vertex1+vertex2+vertex3)/3.0f;
+        ofColor centralColor = image->getColor(centerOfTriangle.x, centerOfTriangle.y);
+        for (int i = 0; i < 3; i++) {
+            mesh->addColor(centralColor);
+        }
+    }
+}
+
+void setVideoGrabberColorToTriangle(ofxDelaunay *delaunay, ofMesh *mesh, ofVideoGrabber *videoGrabber){
+    mesh->clear();
+    ofMesh triangleMesh = delaunay->triangleMesh;
+    // ofImage from ofVideoGrabber
+    ofImage image;
+    ofxCv::copy(*videoGrabber, image);
+    ofImage flippedImage;
+    ofxCv::flip(image, flippedImage, 1);
+    for (int i = 0; i < delaunay->getNumTriangles(); i++) {
+        // get indices
+        int index1 = triangleMesh.getIndex(i*3);
+        int index2 = triangleMesh.getIndex(i*3+1);
+        int index3 = triangleMesh.getIndex(i*3+2);
+        
+        // add vertices
+        ofVec3f vertex1 = triangleMesh.getVertex(index1);
+        ofVec3f vertex2 = triangleMesh.getVertex(index2);
+        ofVec3f vertex3 = triangleMesh.getVertex(index3);
+        mesh->addVertex(vertex1);
+        mesh->addVertex(vertex2);
+        mesh->addVertex(vertex3);
+        
+        // add colors
+        ofVec3f centerOfTriangle = (vertex1+vertex2+vertex3)/3.0f;
+        ofColor centralColor = flippedImage.getColor(centerOfTriangle.x, centerOfTriangle.y);
+        for (int i = 0; i < 3; i++) {
+            mesh->addColor(centralColor);
+        }
+    }
+}
+
+void setRandomColorToEachVertex(ofxDelaunay *delaunay){
+    delaunay->triangleMesh.clearColors();
+    for (int i = 0; i < delaunay->getNumTriangles(); i ++){
+        for (int j = 0; j < 3; j++) {
+            delaunay->triangleMesh.addColor(ofColor(ofRandom(30, 255), ofRandom(30, 255), ofRandom(30, 255), 255));
+        }
+    }
+}
+
+void setImageColorToEachVertex(ofxDelaunay *delaunay, ofMesh *mesh, ofImage *image){
+    mesh->clear();
+    ofMesh triangleMesh = delaunay->triangleMesh;
+    for (int i = 0; i < delaunay->getNumTriangles(); i++) {
+        // get indices
+        int index1 = triangleMesh.getIndex(i*3);
+        int index2 = triangleMesh.getIndex(i*3+1);
+        int index3 = triangleMesh.getIndex(i*3+2);
+        
+        // add vertices
+        mesh->addVertex(triangleMesh.getVertex(index1));
+        mesh->addVertex(triangleMesh.getVertex(index2));
+        mesh->addVertex(triangleMesh.getVertex(index3));
+        
+        // add colors
+        mesh->addColor(image->getColor(triangleMesh.getVertex(index1).x, triangleMesh.getVertex(index1).y));
+        mesh->addColor(image->getColor(triangleMesh.getVertex(index2).x, triangleMesh.getVertex(index2).y));
+        mesh->addColor(image->getColor(triangleMesh.getVertex(index3).x, triangleMesh.getVertex(index3).y));
+    }
+}
+
+void setVideoGrabberColorToEachVertex(ofxDelaunay *delaunay, ofMesh *mesh, ofVideoGrabber *videoGrabber){
+    mesh->clear();
+    ofMesh triangleMesh = delaunay->triangleMesh;
+    // ofImage from ofVideoGrabber
+    ofImage image;
+    ofxCv::copy(*videoGrabber, image);
+    ofImage flippedImage;
+    ofxCv::flip(image, flippedImage, 1);
+    for (int i = 0; i < delaunay->getNumTriangles(); i++) {
+        // get indices
+        int index1 = triangleMesh.getIndex(i*3);
+        int index2 = triangleMesh.getIndex(i*3+1);
+        int index3 = triangleMesh.getIndex(i*3+2);
+        
+        // add vertices
+        mesh->addVertex(triangleMesh.getVertex(index1));
+        mesh->addVertex(triangleMesh.getVertex(index2));
+        mesh->addVertex(triangleMesh.getVertex(index3));
+        
+        // add colors
+        mesh->addColor(flippedImage.getColor(triangleMesh.getVertex(index1).x, triangleMesh.getVertex(index1).y));
+        mesh->addColor(flippedImage.getColor(triangleMesh.getVertex(index2).x, triangleMesh.getVertex(index2).y));
+        mesh->addColor(flippedImage.getColor(triangleMesh.getVertex(index3).x, triangleMesh.getVertex(index3).y));
+    }
+}
+
+void ofApp::updateTriangles(){
+    triangulation.triangulate();
+    if (enableFillRandomColor) setRandomColorToEachVertex(&triangulation);
+    if (enableFillRandomColorTriangle) setRandomColorToTriangle(&triangulation, &mesh);
+    if (enableFillImageColor) setImageColorToEachVertex(&triangulation, &mesh, &image);
+    if (enableFillImageColorTriangle) setImageColorToTriangle(&triangulation, &mesh, &image);
+    if (enableFillVideoGrabberColor) setVideoGrabberColorToEachVertex(&triangulation, &mesh, &videoGrabber);
+    if (enableFillVideoGrabberColorTriangle) setVideoGrabberColorToTriangle(&triangulation, &mesh, &videoGrabber);
+}
+
+void ofApp::updateCanny(){
+    if (enableVideoGrabber) {
+        // use videoGrabber
+        ofxCv::convertColor(flippedImageFromVideoGrabber, grayImage, CV_RGB2GRAY);
+    } else {
+        // use image data
+        ofxCv::convertColor(image, grayImage, CV_RGB2GRAY);
+    }
+    ofxCv::GaussianBlur(grayImage, grayBlurImage, 16);
+    ofxCv::Canny(grayBlurImage, edgeImage, cannyThreshold1, cannyThreshold2);
+    
+    ofxCv::dilate(edgeImage);
+    
+    grayImage.update();
+    grayBlurImage.update();
+    edgeImage.update();
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofEnableSmoothing();
     ofBackground(0);
     
-    // voronoi
-    voronoi.setBounds(ofGetWindowRect());
-    
-    // add random 5 points
-    for (int i = 0; i < 5; i++) {
+    // add some(INITIAL_POINT_NUMBER) random points
+    for (int i = 0; i < INITIAL_POINT_NUMBER; i++) {
         ofPoint instantPoint(ofRandom(0, ofGetWidth()), ofRandom(0, ofGetHeight()));
         
         // delaunay
         triangulation.addPoint(instantPoint);
-        
-        // voronoi
-        voronoi.addPoint(instantPoint);
     }
     
     // delaunay
     triangulation.triangulate();
     
-    // voronoi
-    voronoi.generate();
+    // image
+    image.load("Lenna.png");
+    image.resize(ofGetWidth(), ofGetHeight());
+    
+    // videoGrabber
+    videoGrabber.setDeviceID(0);
+    videoGrabber.initGrabber(ofGetWidth(), ofGetHeight());
     
     // sound
     player.load("beat.mp3");
     player.play();
     
-    // webcam
-    videoGrabber.setDeviceID(0);
-    videoGrabber.setVerbose(true);
-    videoGrabber.setDesiredFrameRate(60);
-    videoGrabber.initGrabber(GRABBER_WIDTH, GERBBER_HEIGHT);
+    // listener
+    // - edit points
+    clearAllPoints.addListener(this, &ofApp::clearAllPointsChanged);
+    addRandomPoints.addListener(this, &ofApp::addRandomPointsChanged);
+    // -- canny
+    addCannyPoints.addListener(this, &ofApp::addCannyPointsChanged);
+    cannyPointsDensity.addListener(this, &ofApp::cannyPointsDensityChanged);
+    cannyThreshold1.addListener(this, &ofApp::cannyThreshold1Changed);
+    cannyThreshold2.addListener(this, &ofApp::cannyThreshold2Changed);
+    // - video grabber
+    enableImage.addListener(this, &ofApp::enableImageChanged);
+    enableVideoGrabber.addListener(this, &ofApp::enableVideoGrabberChanged);
+    enableUpdateCannyForVideoGrabber.addListener(this, &ofApp::enableUpdateCannyForVideoGrabberChanged);
+    // - drawing style
+    enableFillRandomColor.addListener(this, &ofApp::enableFillRandomColorChanged);
+    enableFillRandomColorTriangle.addListener(this, &ofApp::enableFillRandomColorTriangleChanged);
+    enableFillImageColor.addListener(this, &ofApp::enableFillImageColorChanged);
+    enableFillImageColorTriangle.addListener(this, &ofApp::enableFillImageColorTriangleChanged);
+    enableFillVideoGrabberColor.addListener(this, &ofApp::enableFillVideoGrabberColorChanged);
+    enableFillVideoGrabberColorTriangle.addListener(this, &ofApp::enableFillVideoGrabberColorTriangleChanged);
     
     // gui
     panel.setup();
-    panel.add(showDelaunayBackground.set("showDelaunayBackground", true));
-    panel.add(showDelaunayWireframe.set("showDelaunayWireframe", true));
-    panel.add(showDelaunayVertices.set("showDelaunayVertices", true));
-    panel.add(showDelaunayCenter.set("showDelaunayCenter", true));
-    panel.add(showVoronoi.set("showVoronoi", true));    
+    // - enable/disable to show
+    panel.add(showDelaunayBackground.set("showDelaunayBackground", false));
+    panel.add(showDelaunayWireframe.set("showDelaunayWireframe", false));
+    panel.add(showDelaunayVertices.set("showDelaunayVertices", false));
+    panel.add(showDelaunayCenter.set("showDelaunayCenter", false));
+    panel.add(showCannyDebugView.set("showCannyDebugView", false));
+    // - edit points
+    panel.add(clearAllPoints.setup("clearAllPoints"));
+    panel.add(addRandomPoints.setup("addRandomPoints"));
+    // -- canny
+    panel.add(addCannyPointsStyleLabel.setup("addCannyPointsStyle", ofToString(addCannyPointsStyle)));
+    panel.add(addCannyPoints.setup("addCannyPoints"));
+    addCannyPointsStyle = 2;
+    panel.add(cannyPointsDensity.set("cannyPointsDensity", 5, 1, 128));;
+    panel.add(cannyThreshold1.set("cannyThreshold1", 0, 0, 256));
+    panel.add(cannyThreshold2.set("cannyThreshold1", 30, 0, 256));
+    // - select dawing style
+    panel.add(enableFillRandomColor.set("enableFillRandomColor", false));
+    panel.add(enableFillRandomColorTriangle.set("enableFillRandomColorTriangle", false));
+    panel.add(enableFillImageColor.set("enableFillImageColor", false));
+    panel.add(enableFillImageColorTriangle.set("enableFillImageColorTriangle", false));
+    panel.add(enableFillVideoGrabberColor.set("enableFillVideoGrabberColor", false));
+    panel.add(enableFillVideoGrabberColorTriangle.set("enableFillVideoGrabberColorTriangle", true));
+    panel.add(enableImage.set("enableImage", false));
+    panel.add(enableVideoGrabber.set("enableVideoGrabber", false));
+    panel.add(enableUpdateCannyForVideoGrabber.set("enableRealtimeVideoGrabber", true));
     
     showGui = true;
 }
 
-//--------------------------------------------------------------
-void ofApp::update(){
-    // update webcam
-    videoGrabber.update();
-    
-    // update points with sound
-    float volume = ofSoundGetSpectrum(1)[0]*10;
-    if (volume > 0.5) {
-        // ADD
-        
-        // voronoi
-        voronoi.getCells().clear();
-        ofPoint instantPoint(ofRandom(0, ofGetWidth()), ofRandom(0, ofGetHeight()));
-        voronoi.addPoint(instantPoint);
-        voronoi.generate();
+void ofApp::clearAllPointsChanged(){
+    triangulation.reset();
+    mesh.clear();
+}
+
+void ofApp::addRandomPointsChanged(){
+    // add some(INITIAL_POINT_NUMBER) random points
+    float width = enableVideoGrabber ? videoGrabber.getWidth() : image.getWidth();
+    float height = enableVideoGrabber ?  videoGrabber.getHeight() : image.getHeight();
+    for (int i = 0; i < INITIAL_POINT_NUMBER; i++) {
+        ofPoint instantPoint(ofRandom(0, width), ofRandom(0, height));
         
         // delaunay
         triangulation.addPoint(instantPoint);
-        triangulation.triangulate();
-    } else if ((int) voronoi.getCells().size() > 3) {
-        // REMOVE
+    }
+    
+    updateTriangles();
+}
+
+void ofApp::addCannyPointsChanged(){
+    updateCanny();
+    
+    ofPixels edgePixels = edgeImage.getPixels();
+    unsigned char *edgeData = edgePixels.getData();
+    float width = enableVideoGrabber ? videoGrabber.getWidth() : image.getWidth();
+    float height = enableVideoGrabber ?  videoGrabber.getHeight() : image.getHeight();
+    // add points on the edge
+    switch (addCannyPointsStyle) {
+        case 0: // simple and dynamic style(skip cannyPointsDensityWithSound on only x axis not on y axis)
+        {
+            float cannyPointsDensityWithSound = cannyPointsDensity + 3000 * ofSoundGetSpectrum(1)[0] ;
+            for (int i = 0; i < (int)edgePixels.size(); i += cannyPointsDensityWithSound) {
+                if (edgeData[i] != 0) {
+                    // this pixel is on the edge
+                    ofPoint edgePoint(i%(int)width, floor(i/width));
+                    
+                    // delaunay
+                    triangulation.addPoint(edgePoint);
+                }
+            }
+        }
+            break;
+        case 1: // grid style(skip cannyPointsDensityWithSound on both of x and y axis)
+        {
+            float cannyPointsDensityWithSound = cannyPointsDensity + 3000 * ofSoundGetSpectrum(1)[0] ;
+            for (int y = 0; y < (int)height; y += cannyPointsDensityWithSound) {
+                for (int x = 0; x < (int)width; x += cannyPointsDensityWithSound) {
+                    int index = y*width + x;
+                    if (edgeData[index] != 0) {
+                        // this pixel is on the edge
+                        ofPoint edgePoint(index%(int)width, floor(index/width));
+                        
+                        // delaunay
+                        triangulation.addPoint(edgePoint);
+                    }
+                }
+            }
+        }
+            break;
+        case 2: // random style
+        {
+            int edgeDataIndex[(int)edgePixels.size()];
+            for (int i = 0; i < (int)edgePixels.size(); i++) {edgeDataIndex[i] = i;}
+            random_shuffle(edgeDataIndex, edgeDataIndex+(int)edgePixels.size());
+            
+            // save all edge data to vector
+            vector<ofPoint>edgePointVector;
+            for (int i = 0; i < (int)edgePixels.size(); i ++) {
+                if (edgeData[edgeDataIndex[i]] != 0) {
+                    // this pixel is on the edge
+                    ofPoint edgePoint(edgeDataIndex[i] %(int)width, floor(edgeDataIndex[i]/width));
+                    edgePointVector.push_back(edgePoint);
+                }
+            }
+            // depending on sound volume, get points from edge data
+            int edgePointsNumberForCanny = ofSoundGetSpectrum(1)[0]*edgePointVector.size()*0.5;
+            random_shuffle(edgePointVector.begin(), edgePointVector.end());
+            for (int i = 0; i < edgePointsNumberForCanny; i++) {
+                // delaunay
+                triangulation.addPoint(edgePointVector[i]);
+            }
+        }
+            break;
+        default:
+            cout << "something wrong" << endl;
+            break;
+    }
+    // add corner points
+    triangulation.addPoint(ofPoint(0, 0));
+    triangulation.addPoint(ofPoint(0, height));
+    triangulation.addPoint(ofPoint(width, height));
+    triangulation.addPoint(ofPoint(width, 0));
+    
+    updateTriangles();
+}
+
+void ofApp::cannyPointsDensityChanged(int &cannyPointsDensity){
+    if(enableImage) {
+        clearAllPointsChanged();
+        addCannyPointsChanged();
+    }
+}
+
+void ofApp::cannyThreshold1Changed(float &threshold1){
+    updateCanny();
+}
+
+void ofApp::cannyThreshold2Changed(float &threshold2){
+    updateCanny();
+}
+
+void ofApp::enableFillRandomColorChanged(bool &enable){
+    if (enable) {
+        // disable other draw styles
+        enableFillRandomColorTriangle = false;
+        enableFillImageColor = false;
+        enableFillImageColorTriangle = false;
+        enableFillVideoGrabberColor = false;
+        enableFillVideoGrabberColorTriangle = false;
         
-        // voronoi
-        voronoi.getCells().clear();
-        voronoi.getPoints().pop_back();
-        voronoi.generate();
+        setRandomColorToEachVertex(&triangulation);
+    }else {
+        triangulation.triangleMesh.clearColors();
+    }
+}
+
+void ofApp::enableFillRandomColorTriangleChanged(bool &enable){
+    if (enable) {
+        // disable other draw styles
+        enableFillRandomColor = false;
+        enableFillImageColor = false;
+        enableFillImageColorTriangle = false;
+        enableFillVideoGrabberColor = false;
+        enableFillVideoGrabberColorTriangle = false;
         
-        // delaunay
-        triangulation.removePointAtIndex(triangulation.getNumPoints()-1);
-        triangulation.triangulate();
+        setRandomColorToTriangle(&triangulation, &mesh);
+    }else {
+        mesh.clear();
+    }
+}
+
+void ofApp::enableFillImageColorChanged(bool &enable){
+    if (enable) {
+        // disable other draw styles
+        enableFillRandomColorTriangle = false;
+        enableFillRandomColor = false;
+        enableFillImageColorTriangle = false;
+        enableFillVideoGrabberColor = false;
+        enableFillVideoGrabberColorTriangle = false;
+        
+        setImageColorToEachVertex(&triangulation, &mesh, &image);
+    } else {
+        mesh.clear();
+    }
+}
+
+void ofApp::enableFillImageColorTriangleChanged(bool &enable){
+    if (enable) {
+        // disable other draw styles
+        enableFillRandomColor = false;
+        enableFillRandomColorTriangle = false;
+        enableFillImageColor = false;
+        enableFillVideoGrabberColor = false;
+        enableFillVideoGrabberColorTriangle = false;
+        
+        setImageColorToTriangle(&triangulation, &mesh, &image);
+    } else {
+        mesh.clear();
+    }
+}
+
+void ofApp::enableFillVideoGrabberColorChanged(bool &enable){
+    if (enable) {
+        if (!enableVideoGrabber) enableVideoGrabber = true;
+        // disable other draw styles
+        enableFillRandomColor = false;
+        enableFillRandomColorTriangle = false;
+        enableFillImageColor = false;
+        enableFillImageColorTriangle = false;
+        enableFillVideoGrabberColorTriangle = false;
+        
+        setVideoGrabberColorToEachVertex(&triangulation, &mesh, &videoGrabber);
+    } else {
+        mesh.clear();
+    }
+}
+
+void ofApp::enableFillVideoGrabberColorTriangleChanged(bool &enable){
+    if (enable) {
+        if (!enableVideoGrabber) enableVideoGrabber = true;
+        // disable other draw styles
+        enableFillRandomColor = false;
+        enableFillRandomColorTriangle = false;
+        enableFillImageColor = false;
+        enableFillImageColorTriangle = false;
+        enableFillVideoGrabberColor = false;
+        
+        setVideoGrabberColorToTriangle(&triangulation, &mesh, &videoGrabber);
+    } else {
+        mesh.clear();
+    }
+}
+
+void ofApp::enableImageChanged(bool &enable){
+    // disable enableVideoGrabber
+    if (enable) {
+        enableVideoGrabber = false;
+        if (videoGrabber.isInitialized()) {
+            videoGrabber.close();
+        }
+        updateCanny();
+    } else {
+        // enable enableVideoGrabber
+        enableVideoGrabber = true;
+    }
+}
+
+void ofApp::enableVideoGrabberChanged(bool &enable){
+    if (enable) {
+        // disable enableImage
+        enableImage = false;
+        if (!videoGrabber.isInitialized()) {
+            videoGrabber.setDeviceID(0);
+            videoGrabber.setDesiredFrameRate(60);
+            videoGrabber.initGrabber(ofGetWidth(), ofGetHeight());
+            ofImage imageFromVideoGrabber;
+            ofxCv::copy(videoGrabber, imageFromVideoGrabber);
+            ofxCv::flip(imageFromVideoGrabber, flippedImageFromVideoGrabber, 1);
+            flippedImageFromVideoGrabber.update();
+            updateCanny();
+        }
+    } else {
+        // enable enableImage
+        enableImage = true;
+    }
+}
+
+void ofApp::enableUpdateCannyForVideoGrabberChanged(bool &enable){
+    if (enable) {
+        if (!enableVideoGrabber) enableVideoGrabber = true;
+    }
+}
+
+//--------------------------------------------------------------
+void ofApp::update(){
+    // debug
+    ofSetWindowTitle(ofToString(ofGetFrameRate(), 0));
+    
+    // update videograbber
+    if (videoGrabber.isInitialized()) {
+        videoGrabber.update();
+        ofImage imageFromVideoGrabber;
+        ofxCv::copy(videoGrabber, imageFromVideoGrabber);
+        ofxCv::flip(imageFromVideoGrabber, flippedImageFromVideoGrabber, 1);
+        flippedImageFromVideoGrabber.update();
+        if (enableUpdateCannyForVideoGrabber) {
+            // reset all points
+            clearAllPointsChanged();
+            // add canny points
+            addCannyPointsChanged();
+        } else {
+            updateCanny();
+        }
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     // draw the background of triangles
-    if (showDelaunayBackground) {
-        ofSetColor(0, 0, 127);
-        ofFill();
-        triangulation.draw();
-        ofSetColor(255);
+    if (enableFillRandomColorTriangle || enableFillImageColor || enableFillImageColorTriangle || enableFillVideoGrabberColor || enableFillVideoGrabberColorTriangle) {
+        // draw mesh
+        mesh.draw();
+    } else {
+        if (showDelaunayBackground) {
+            ofSetColor(0, 0, 127);
+            ofFill();
+            triangulation.draw();
+            ofSetColor(255);
+        }
     }
     
     // draw wire frame of triangles
@@ -123,34 +559,45 @@ void ofApp::draw(){
             
             ofVec3f center = (vertex1+vertex2+vertex3)/3.0;
             
-            ofDrawCircle(center, 5);
+            ofDrawCircle(center, RADIUS_CENTER_OF_MESH);
         }
         ofSetColor(255);
     }
-    
-    // vornoi
-    if (showVoronoi) {
-        voronoi.draw();
-        ofSetColor(255);
-    };
-    
-    // webcam
-    image.setFromPixels(videoGrabber.getPixels());
-    image.mirror(false, true);
-    image.draw(ofGetWidth()-GRABBER_WIDTH, 0, GRABBER_WIDTH, GERBBER_HEIGHT);
     
     // gui
     if (showGui) panel.draw();
     
     // debug
-    ofDrawBitmapString("'r' to reset", ofPoint(10,20));
+    if (showCannyDebugView) {
+        ofVec2f cannyDebugViewSize(ofGetWidth()/4.0f, ofGetHeight()/4.0f);
+        if (enableVideoGrabber) {
+            flippedImageFromVideoGrabber.draw(ofGetWidth()-2*cannyDebugViewSize.x, 0, cannyDebugViewSize.x, cannyDebugViewSize.y);
+        } else {
+            image.draw(ofGetWidth()-2*cannyDebugViewSize.x, 0, cannyDebugViewSize.x, cannyDebugViewSize.y);
+        }
+        grayImage.draw(ofGetWidth()-cannyDebugViewSize.x, 0, cannyDebugViewSize.x, cannyDebugViewSize.y);
+        grayBlurImage.draw(ofGetWidth()-2*cannyDebugViewSize.x, cannyDebugViewSize.y, cannyDebugViewSize.x, cannyDebugViewSize.y);
+        edgeImage.draw(ofGetWidth()-cannyDebugViewSize.x, cannyDebugViewSize.y, cannyDebugViewSize.x, cannyDebugViewSize.y);
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     switch (key) {
-        case 'r':
-            triangulation.reset();
+        case '0':
+            addCannyPointsStyle = 0;
+            addCannyPointsStyleLabel = ofToString(0)+"(simple)";
+            break;
+        case '1':
+            addCannyPointsStyle = 1;
+            addCannyPointsStyleLabel = ofToString(1)+"(grid)";
+            break;
+        case '2':
+            addCannyPointsStyle = 2;
+            addCannyPointsStyleLabel = ofToString(2)+"(random)";
+            break;
+        case 'f':
+            ofToggleFullscreen();
             break;
         case 'h':
             showGui = !showGui;
@@ -177,19 +624,15 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+    // update delaunay
+    triangulation.addPoint(ofPoint(x, y));
     
+    updateTriangles();
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-    // delaunay
-    triangulation.addPoint(ofPoint(x, y));
-    triangulation.triangulate();
     
-    // voronoi
-    voronoi.getCells().clear();
-    voronoi.addPoint(ofPoint(x, y));
-    voronoi.generate();
 }
 
 //--------------------------------------------------------------
